@@ -1,10 +1,16 @@
-### SSH Server Docker Image
-
-This Docker image provides an SSH server that allows secure file copying via SCP. It is configured to start an SSH daemon, making it ready to accept SCP connections.
+# SSH Server Docker Image
 
 ![GitHub License](https://img.shields.io/github/license/barrychum/docker-openssh) ![Custom Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/barrychum/6210ce668e923bd7b478ff9f965debee/raw/8b83476d14cdb3e9c3c0c6e8d39623c4dbf888f7/docker-openssh-build-date-badge.json) 
 
-A docker image is available at [stellarhub/openssh](https://hub.docker.com/r/stellarhub/openssh) on Docker Hub.
+This repository is intend to be a showcase for a simple Continuous Integration (CI).  When the code (Dockerfile) to build a docker image for deployment is updated in the main branch, a Github Workflow is triggered to perform a series of actions.  
+
+In this example, the variable VERSION in Dockerfile is used to used as the docker image tag.  The workflow ensures the required images can be built, and all images are properly built before pushing to the Docker hub image repository.
+
+The workflow is contructed in steps which can be reused in similar projects by supplying variables and secrets in the repo.  Secrets are secured properly using repository.
+
+The Docker image created with this repo works is a SSH server that can be used for copying sensitive information securely via SCP.  
+
+The docker image built with the workflow is available at [stellarhub/openssh](https://hub.docker.com/r/stellarhub/openssh) on Docker Hub.
 
 1. **Create a Dockerfile**:
 
