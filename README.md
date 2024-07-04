@@ -1,52 +1,41 @@
 # SSH Server Docker Image
 
-![GitHub License](https://img.shields.io/github/license/barrychum/docker-openssh) ![Custom Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/barrychum/6210ce668e923bd7b478ff9f965debee/raw/8b83476d14cdb3e9c3c0c6e8d39623c4dbf888f7/docker-openssh-build-date-badge.json) 
+This repository demonstrates a simple Continuous Integration (CI) setup. When the Dockerfile in the main branch is updated, a GitHub Workflow is triggered to perform a series of actions, including building and pushing a Docker image.
 
-This repository is intend to be a showcase for a simple Continuous Integration (CI).  When the code (Dockerfile) to build a docker image for deployment is updated in the main branch, a Github Workflow is triggered to perform a series of actions.  
+## Features
+- Uses the `VERSION` variable in the Dockerfile as the Docker image tag.
+- Builds and pushes images to Docker Hub.
+- Saves build artifacts and reports build status via badges.
+- Creates a Docker image for an SSH server, suitable for secure file transfers via SCP.
 
-In this example, the variable VERSION in Dockerfile is used to used as the docker image tag.  The workflow ensures the required images can be built, and all images are properly built before pushing to the Docker hub image repository.
+## Docker Image
+The Docker image is available on Docker Hub: [stellarhub/openssh](https://hub.docker.com/r/stellarhub/openssh).
 
-The workflow is contructed in steps which can be reused in similar projects by supplying variables and secrets in the repo.  Secrets are secured properly using repository.
-
-The workflow also saves build artifacts as a record.  Information such as build date and status is also reported as a easy to understand badge at the top of this README. Two types of badges are used, a built-in Github bagde and a 3rd party badge that uses Gits as a persistant storage for the badge.
-
-The Docker image created with this repo is a SSH server that can be used for copying sensitive information securely via SCP.  
-
-The docker image built with the workflow is available at [stellarhub/openssh](https://hub.docker.com/r/stellarhub/openssh) on Docker Hub.
-
+### Steps to Use
 1. **Create a Dockerfile**:
+   Use the Dockerfile located at the root of this repository.
 
-   Please use the Dockerfile at the root of this repository.
-
-2. **Build the Docker image**:
-
+2. **Build the Docker Image**:
    ```bash
    docker build --build-arg USERNAME=myuser --build-arg PASSWORD=mypassword -t my-scp-server .
    ```
-
    Replace `myuser` and `mypassword` with your desired username and password.
 
-3. **Run the Docker container**:
-
+3. **Run the Docker Container**:
    ```bash
    docker run -d -p 2222:22 -e USERNAME=myuser -e PASSWORD=mypassword -v /$HOME/mnt:/mnt/data --name scp-server my-scp-server
-
-   docker run -d --rm  -p 22:22  -v .:/mnt/data stellarhub/openssh --name ssh stellarhub/openssh
    ```
+   - `-v /path/to/local/disk:/mnt/data` mounts a local directory to `/mnt/data` inside the container.
+   - `-p 2222:22` maps host port 2222 to container port 22.
+   - `--name scp-server` names the container `scp-server`.
 
-   - `-v /path/to/local/disk:/mnt/data` mounts a local directory or disk (`/path/to/local/disk` on the host) to `/mnt/data` inside the container.
-   - `-p 2222:22` maps host port 2222 to container port 22 (change `2222` to any desired port on the host).
-   - `--name scp-server` assigns a name to the container (`scp-server` in this example).
-
-4. **Access your SCP server**:
-
-   Use an SCP client to connect to your server. For example:
-
+4. **Access the SCP Server**:
+   Use an SCP client to connect to your server:
    ```bash
-   scp file.txt myuser@localhost:2222:/mnt/data/destination/
-   scp -P 2222 ./Dockerfile myuser@localhost:/mnt/data/keyvault
+   scp -P 2222 file.txt myuser@localhost:/mnt/data/destination/
    ```
+   Replace `file.txt` with the file to transfer and adjust the destination path as needed.
 
-   Replace `myuser` with your username (`myuser` in this example), `file.txt` with the file you want to transfer, and adjust the destination path (`/mnt/data/destination/` in this example) as needed.
+## License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
-This setup allows you to build and run an SCP server Docker container with a specified mount point for local disk and customizable username/password via build arguments. 
