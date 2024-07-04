@@ -1,0 +1,83 @@
+name: workflow 007
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '/Dockerfile'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Docker Build Tag
+      run: |
+        VERSION=$(grep -m 1 '^ARG VERSION=' Dockerfile | cut -d '=' -f 2)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "TAG=$VERSION" >> $GITHUB_ENV
+
+    - name: Display Tag for Confirmation
+      run: |
+        echo "Using tag       : $TAG"
+        echo "Using Dockerfile: $VERSION"
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: |
+          ${{ env.IMAGE_NAME }}:latest
+          ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+
+    - name: Get image digest
+      id: get_digest
+      run: |
+        DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ env.TAG }} | grep -m 1 "Digest:" | awk '{ print $2 }')
+        echo "DIGEST=$DIGEST" >> $GITHUB_ENV
+
+    - name: Save Dockerfile and tag information to JSON
+      run: |
+        echo "{\"image_name\": \"${{ env.IMAGE_NAME }}\", \"tag\": \"${{ env.TAG }}\", \"digest\": \"${{ env.DIGEST }}\"}" > dev-build-info.json
+
+    - name: Upload build info as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: dev-build-info
+        path: dev-build-info.json
+
+    - name: Generate badge data
+      run: |
+        # BADGE_VALUE="passing"
+        BADGE_VALUE=$(date -u +'%Y-%m-%d')
+        echo '{"schemaVersion": 1, "label": "build", "message": "'$BADGE_VALUE'", "color": "yellow"}' > docker-openssh-build-date-badge.json
+
+    - name: Create or update gist
+      uses: exuanbo/actions-deploy-gist@v1
+      with:
+        token: ${{ secrets.GIST_TOKEN }}
+        gist_id: ${{ vars.GIST_ID }}
+        file_path: docker-openssh-build-date-badge.json
+        file_type: text
