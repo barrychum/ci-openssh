@@ -8,7 +8,9 @@ In this example, the variable VERSION in Dockerfile is used to used as the docke
 
 The workflow is contructed in steps which can be reused in similar projects by supplying variables and secrets in the repo.  Secrets are secured properly using repository.
 
-The Docker image created with this repo works is a SSH server that can be used for copying sensitive information securely via SCP.  
+The workflow also saves build artifacts as a record.  Information such as build date and status is also reported as a easy to understand badge at the top of this README. Two types of badges are used, a built-in Github bagde and a 3rd party badge that uses Gits as a persistant storage for the badge.
+
+The Docker image created with this repo is a SSH server that can be used for copying sensitive information securely via SCP.  
 
 The docker image built with the workflow is available at [stellarhub/openssh](https://hub.docker.com/r/stellarhub/openssh) on Docker Hub.
 
