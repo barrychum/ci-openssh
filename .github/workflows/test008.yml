@@ -25,7 +25,7 @@ jobs:
         cat <<EOF > $JSON
         {
           "schemaVersion": 1,
-          "label": "buixxxld",
+          "label": "xld",
           "message": "$BADGE_VALUE",
           "color": "green"
         }
@@ -34,7 +34,7 @@ jobs:
     # Upload json from step badge_data 
     # to gist for shields.io Endpoint badge
     - name: Create or update gist
-      uses: stellarhub/push-gist-action@v2
+      uses: stellarhub/push-gist-action@v1
       with:
         token: ${{ secrets.GIST_TOKEN }}
         gist_id: ${{ vars.GIST_ID }}
