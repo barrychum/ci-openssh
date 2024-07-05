@@ -89,6 +89,7 @@ jobs:
       run: |
         DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ env.TAG }} | grep -m 1 "Digest:" | awk '{ print $2 }')
         JSON="build-artifact.json"
+        echo "json=$JSON" >> $GITHUB_OUTPUT        
         cat <<EOF > $JSON
         {
           "image_name": "${{ env.IMAGE_NAME }}",
@@ -110,7 +111,7 @@ jobs:
       run: |
         BADGE_VALUE=$(date -u +'%Y-%m-%d')
         JSON="docker-openssh-build-date-badge.json"
-        echo "::set-output name=json::$JSON"
+        echo "json=$JSON" >> $GITHUB_OUTPUT
         cat <<EOF > $JSON
         {
           "schemaVersion": 1,
