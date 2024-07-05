@@ -25,7 +25,7 @@ jobs:
         cat <<EOF > $JSON
         {
           "schemaVersion": 1,
-          "label": "build",
+          "label": "buixxxld",
           "message": "$BADGE_VALUE",
           "color": "green"
         }
