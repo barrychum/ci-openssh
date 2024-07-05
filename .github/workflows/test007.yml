@@ -1,4 +1,4 @@
-name: ci
+name: workflow 007
 
 on:
   push:
@@ -105,9 +105,12 @@ jobs:
 
     # Generate json for shields.io Endpoint badge
     - name: Generate badge data
+      id: badge_data
       run: |
         BADGE_VALUE=$(date -u +'%Y-%m-%d')
-        cat <<EOF > docker-openssh-build-date-badge.json
+        JSON="docker-openssh-build-date-badge.json"
+        echo "::set-output name=json::$JSON"
+        cat <<EOF > $JSON
         {
           "schemaVersion": 1,
           "label": "build",
@@ -122,6 +125,6 @@ jobs:
       with:
         token: ${{ secrets.GIST_TOKEN }}
         gist_id: ${{ vars.GIST_ID }}
-        file_path: docker-openssh-build-date-badge.json
+        file_path: ${{ steps.badge_data.outputs.json }}
         file_type: text
 
