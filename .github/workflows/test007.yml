@@ -48,7 +48,7 @@ jobs:
         tags: "test_image"
 
     # Use docker run to check image
-    # adjust the docker run command for image    
+    # adjust the docker run command to test    
     - name: Test
       run: |
         docker run -d --rm "test_image"   
@@ -88,7 +88,8 @@ jobs:
       id: get_digest
       run: |
         DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ env.TAG }} | grep -m 1 "Digest:" | awk '{ print $2 }')
-        cat <<EOF > build-artifact.json
+        JSON="build-artifact.json"
+        cat <<EOF > $JSON
         {
           "image_name": "${{ env.IMAGE_NAME }}",
           "tag": "${{ env.TAG }}",
@@ -96,12 +97,12 @@ jobs:
         }
         EOF
 
-    # Upload digest json to workflow artifact
+    # Upload digest json from step get_digest to workflow artifact
     - name: Upload build info as artifact
       uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}-build-artifact
-        path: build-artifact.json
+        path: ${{ steps.get_digest.outputs.json }}
 
     # Generate json for shields.io Endpoint badge
     - name: Generate badge data
@@ -119,7 +120,8 @@ jobs:
         }
         EOF
 
-    # Upload json for shields.io Endpoint badge to gist
+    # Upload json from step badge_data 
+    # to gist for shields.io Endpoint badge
     - name: Create or update gist
       uses: stellarhub/actions-push-gist@v1
       with:
