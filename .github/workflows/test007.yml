@@ -124,7 +124,7 @@ jobs:
     # Upload json from step badge_data 
     # to gist for shields.io Endpoint badge
     - name: Create or update gist
-      uses: stellarhub/actions-push-gist@v1
+      uses: stellarhub/push-gist-action@v1
       with:
         token: ${{ secrets.GIST_TOKEN }}
         gist_id: ${{ vars.GIST_ID }}
