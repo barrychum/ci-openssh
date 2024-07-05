@@ -1,7 +1,7 @@
 # (Continuous Integration) SSH Server Docker Image
 ![GitHub License](https://img.shields.io/github/license/barrychum/docker-openssh) ![Custom Badge](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/barrychum/6210ce668e923bd7b478ff9f965debee/raw/docker-openssh-build-date-badge.json) 
 
-![Custom Badge](https://ghcr-badge.egpl.dev/barrychum/ci-openssh/tags?color=green&ignore=&n=1&label=ghcr+tag&trim=) ![Custom Badge](https://ghcr-badge.egpl.dev/barrychum/ci-openssh/size?color=green&tag=latest&label=image+size&trim=)
+![Custom Badge](https://ghcr-badge.egpl.dev/barrychum/ci-openssh/tags?color=%2344cc11&ignore=&n=1&label=ghcr+tag&trim=) ![Custom Badge](https://ghcr-badge.egpl.dev/barrychum/ci-openssh/size?color=%2344cc11&tag=latest&label=image+size&trim=)
 
 This repository demonstrates a simple Continuous Integration (CI) setup. When the Dockerfile in the main branch is updated, a GitHub Workflow is triggered to perform a series of actions, including building and pushing a Docker image.
 
