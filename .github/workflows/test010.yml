@@ -1,4 +1,4 @@
-name: ci
+name: workflow 010
 
 on:
   workflow_dispatch:
