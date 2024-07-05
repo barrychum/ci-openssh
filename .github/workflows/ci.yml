@@ -1,0 +1,127 @@
+name: ci
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '/Dockerfile'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Retrieve information for other steps
+    - name: Set up Docker Build Tag
+      run: |
+        VERSION=$(grep -m 1 '^ARG VERSION=' Dockerfile | cut -d '=' -f 2)
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "TAG=$VERSION" >> $GITHUB_ENV
+
+    # Display variables for debugging
+    - name: Display Tag for Confirmation
+      run: |
+        echo "Using tag       : $TAG"
+        echo "Using Dockerfile: $VERSION"
+
+    # Setup Docker buildx environment
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    # Build and load image for testing
+    - name: Build and export to Docker
+      uses: docker/build-push-action@v6
+      with:
+        context: .
+        file: ./Dockerfile
+        load: true
+        tags: "test_image"
+
+    # Use docker run to check image
+    # adjust the docker run command for image    
+    - name: Test
+      run: |
+        docker run -d --rm "test_image"   
+
+    # Login to Docker Hub 
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ vars.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
+        
+    # Login to GitHub Container Registry (ghcr)
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GHCR_TOKEN }}
+
+    # Build and push image to registies
+    # add your targets in the tags
+    # Authenticate using docker/login-action above
+    - name: Build and push
+      uses: docker/build-push-action@v6
+      with:
+        platforms: linux/amd64,linux/arm64
+        context: .
+        file: ./Dockerfile
+        push: true
+        tags: |
+          ${{ env.IMAGE_NAME }}:latest
+          ${{ env.IMAGE_NAME }}:${{ env.TAG }}
+          ghcr.io/${{ github.repository }}:latest
+
+    # Save image digest to json
+    - name: Get image digest
+      id: get_digest
+      run: |
+        DIGEST=$(docker buildx imagetools inspect ${{ env.IMAGE_NAME }}:${{ env.TAG }} | grep -m 1 "Digest:" | awk '{ print $2 }')
+        cat <<EOF > build-artifact.json
+        {
+          "image_name": "${{ env.IMAGE_NAME }}",
+          "tag": "${{ env.TAG }}",
+          "digest": "$DIGEST"
+        }
+        EOF
+
+    # Upload digest json to workflow artifact
+    - name: Upload build info as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ github.event.repository.name }}-build-artifact
+        path: build-artifact.json
+
+    # Generate json for shields.io Endpoint badge
+    - name: Generate badge data
+      run: |
+        BADGE_VALUE=$(date -u +'%Y-%m-%d')
+        cat <<EOF > docker-openssh-build-date-badge.json
+        {
+          "schemaVersion": 1,
+          "label": "build",
+          "message": "$BADGE_VALUE",
+          "color": "green"
+        }
+        EOF
+
+    # Upload json for shields.io Endpoint badge to gist
+    - name: Create or update gist
+      uses: stellarhub/actions-push-gist@v1
+      with:
+        token: ${{ secrets.GIST_TOKEN }}
+        gist_id: ${{ vars.GIST_ID }}
+        file_path: docker-openssh-build-date-badge.json
+        file_type: text
+
