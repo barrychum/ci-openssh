@@ -25,7 +25,7 @@ jobs:
       run: |
         BADGE_VALUE=$(date -u +'%Y-%m-%d')
         JSON="docker-openssh-build-date-badge.json"
-        echo "::set-output name=json::$JSON"
+        echo "json=$JSON" >> $GITHUB_OUTPUT
         cat <<EOF > $JSON
         {
           "schemaVersion": 1,
