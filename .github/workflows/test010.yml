@@ -21,6 +21,7 @@ jobs:
     - name: Update Scout summary in Hugo site
       run: |
         mkdir -p folder1/content/scout-summary
+        cd folder1
         echo '---' >> content/scout-summary/latest-scan.md
 
     - name: Commit and push changes
